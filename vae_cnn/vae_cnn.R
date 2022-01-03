@@ -87,7 +87,7 @@ vae_module <- nn_module(
     f <- self$encoder(x)
     mu <- f[[2]]
     log_var <- f[[3]]
-    z <- mu + torch_exp(log_var)*torch_randn(c(dim(x)[1], self$latent_dim))
+    z <- mu + torch_exp(log_var$mul(0.5))*torch_randn(c(dim(x)[1], self$latent_dim))
     reconst_x <- self$decoder(z)
     
     list(reconst_x, mu, log_var)
@@ -208,7 +208,7 @@ if(latent_dim == 2) {
   # Visualize latent 
   par(mfrow=c(1, 1))
   encoding = vae$encoder(torch_tensor(mnist$test$images/255))
-  z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
+  z = encoding[[1]] + torch_exp(encoding[[2]]$mul(0.5))*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
   plot(z[, 1], z[, 2], pch=20, col=mnist$test$labels)
 }
 
