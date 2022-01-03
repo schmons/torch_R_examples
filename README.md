@@ -16,7 +16,7 @@ The `R` files can be run in an IDE of choice such as `RStudio`.
 
 ## Latent dimensions
 
-The variable `latent_dim` at the beginning denotes the dimension of the latent variables. If `d=2` the code will plot the latent variables created color-coded by the associated labels. This is particularly interesting for the supervised VAE.
+The variable `latent_dim` at the beginning denotes the dimension of the latent variables. If `latent_dim=2` the code will plot the latent variables created color-coded by the associated labels. This is particularly interesting for the supervised VAE.
 
 _Note_: The focus here was to build a working prototype, so the performance of each one of them is likely far from optimal and can be improved.
 
