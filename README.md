@@ -4,7 +4,7 @@ This is to explore what can be done with torch in R. Currently, this repo contai
 
 - `vae_mlp`: a basic variational autoencoder using MLP encoder and decoder.
 - `vae_cnn`: same but using a more sophisticated convolutional neural network.
-- `s_vae_mlp`: a (fully) supervised VAE regularized by a classifier on top the _latent_ variables as discussed by Joy et. al. (2021)[^bignote], equation (2). This isn't the best way to do (semi-)supervised variational inference. A better version would be [CCVAE](https://github.com/thwjoy/ccvae), also introduced by Joy et. al. (2021)[^bignote], Section 4.2. (I might come back to implement this when I find the time.)
+- `s_vae_mlp`: a (fully) supervised VAE regularized by a classifier on top the _latent_ variables. This is not the "standard" supervised VAE but instead follows ideas of Joy et. al. (2021)[^bignote], equation (2). This isn't the best way to do (semi-)supervised variational inference. A better version would be [CCVAE](https://github.com/thwjoy/ccvae), also introduced by Joy et. al. (2021)[^bignote], Section 4.2. (I might come back to implement this when I find the time.)
 
 ## Latent dimensions
 
