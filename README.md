@@ -8,7 +8,11 @@ This is to explore what can be done with [torch for R](https://torch.mlverse.org
 
 ## Dependencies
 
-This package is based on [torch for R](https://torch.mlverse.org/). In addition, to load the `MNIST` dataset the code uses the [`dslab`](https://CRAN.R-project.org/package=dslabs) package. 
+This package is based on [torch for R](https://torch.mlverse.org/). In addition, to load the `MNIST` dataset the code uses the [`dslab`](https://CRAN.R-project.org/package=dslabs) package. Some code also requires the `ggsci` package for color palattes.  
+
+## Usage
+
+The `R` files can be run in an IDE of choice such as `RStudio`.
 
 ## Latent dimensions
 
