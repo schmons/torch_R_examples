@@ -14,7 +14,7 @@ mnist <- read_mnist()
 library(torch)
 
 # Set VAEs latent dimension
-latent_dim <- 2
+latent_dim <- 50
 
 # Define encoder and decoder network
 encoder <- nn_module(
@@ -46,27 +46,9 @@ encoder <- nn_module(
       self$dropout2() %>%
       list(self$fc2(.), self$fc3(.))
     
-      # output1 = self$fc2(hidden)
-      # output2 = self$fc3(hidden)
-      # list(output1, output2)
   }
 )
 
-
-# class Decoder(nn.Module):
-#   def __init__(self):
-#   super(Decoder, self).__init__()
-# c = capacity
-# self.fc = nn.Linear(in_features=latent_dims, out_features=c*2*7*7)
-# self.conv2 = nn.ConvTranspose2d(in_channels=c*2, out_channels=c, kernel_size=4, stride=2, padding=1)
-# self.conv1 = nn.ConvTranspose2d(in_channels=c, out_channels=1, kernel_size=4, stride=2, padding=1)
-# 
-# def forward(self, x):
-#   x = self.fc(x)
-# x = x.view(x.size(0), capacity*2, 7, 7) # unflatten batch of feature vectors to a batch of multi-channel feature maps
-# x = F.relu(self.conv2(x))
-# x = torch.sigmoid(self.conv1(x)) # last layer before output is sigmoid, since we are using BCE as reconstruction loss
-# return x
 
 decoder <- nn_module(
   "decoder",
@@ -90,13 +72,6 @@ decoder <- nn_module(
   }
 )
 
-# net = encoder(10)
-# 
-# forward = net(torch_reshape(torch_tensor(mnist$train$images[1:2, ]/255), list(2, 1, 28, 28)))
-# forward[[2]]$size(1)
-# 
-# net2 = decoder()
-# net2(forward[[2]])
 # Define VAE model using encoder and decoder from above
 vae_module <- nn_module(
 
@@ -156,7 +131,7 @@ dl <- dataloader(mnist_dataset(), batch_size = 250, shuffle = TRUE, drop_last=TR
 # Optimizer. Note that a scheduler and/or a different learning rate could improve performance
 optimizer <- optim_adam(vae$parameters, lr = 0.001)
 
-epochs = 30  # Number of full epochs (passes through the dataset)
+epochs = 100  # Number of full epochs (passes through the dataset)
 
 # This is just changing graph parameters for later
 par(mfrow=c(5, 4), mai=rep(0, 4))
