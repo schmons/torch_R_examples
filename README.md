@@ -4,8 +4,8 @@ This is to explore what can be done with torch in R. Currently, this repo contai
 
 - `vae_mlp`: a basic variational autoencoder using MLP encoder and decoder.
 - `vae_cnn`: same but using a more sophisticated convolutional neural network.
-- `s_vae_mlp`: a supervised VAE regularized by a classifier on top the _latent_ variables as discussed in [^bignote], equation (2). 
+- `s_vae_mlp`: a supervised VAE regularized by a classifier on top the _latent_ variables as discussed in [^1], equation (2). 
 
 
-[^bignote] **Joy, Tom, et al. "Capturing Label Characteristics in VAEs." International Conference on Learning Representations. 2020.**
+[^1] **Joy, Tom, et al. "Capturing Label Characteristics in VAEs." International Conference on Learning Representations. 2020.**
 
