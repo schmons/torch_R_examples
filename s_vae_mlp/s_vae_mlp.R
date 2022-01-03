@@ -10,6 +10,9 @@ mnist <- read_mnist()
 
 #####################################################
 
+# Set dimension of latent variable
+latent_dim = 50
+
 
 library(torch)
 
@@ -58,11 +61,8 @@ classifier <- nn_module(
   "classifier",
   initialize = function(in_features) {
     
-    self$modelFit <- nn_sequential(nn_linear(in_features, 100),
-                                   nn_relu(),
-                                   nn_linear(100, 10)
+    self$modelFit <- nn_sequential(nn_linear(in_features, 10)
                                    )
-    
   },
   forward = function(x){
     self$modelFit(x)
@@ -123,7 +123,7 @@ mnist_dataset <- dataset(
 )
 
 #Initialize the VAE module with latent dimension as specified
-ss_vae <- ss_vae_module(latent_dim=10)
+ss_vae <- ss_vae_module(latent_dim=latent_dim)
 
 # Dataloader
 dl <- dataloader(mnist_dataset(), batch_size = 250, shuffle = TRUE, drop_last=TRUE)
@@ -137,7 +137,6 @@ scheduler <- lr_multiplicative(optimizer, lr_lambda=lmbda, last_epoch = -1, verb
 epochs = 30  # Number of full epochs (passes through the dataset)
 
 # This is just changing graph parameters for later
-par(mfrow=c(5, 4), mai=rep(0, 4))
 
 
 # Optimization loop
@@ -153,7 +152,7 @@ for(epoch in 1:epochs) {
     
     # likelihood part of the loss
     loss = nn_bce_loss(reduction = "sum")
-    classifier_loss = nn_cross_entropy_loss()
+    classifier_loss = nn_cross_entropy_loss(reduction="sum")
     mu = forward[[2]]
     log_var = forward[[3]]
     
@@ -161,7 +160,7 @@ for(epoch in 1:epochs) {
     kl_div =  1 + log_var - mu$pow(2) - log_var$exp()
     kl_div_sum = - 0.5 *kl_div$sum()
 
-    regularizer = 0.01*classifier_loss(forward[[4]], b$y)
+    regularizer = 100*classifier_loss(forward[[4]], b$y)
 
     # Full loss
     output <- loss(forward[[1]], b$x) + kl_div_sum + regularizer
@@ -187,6 +186,8 @@ for(epoch in 1:epochs) {
   cat(sprintf("Loss at epoch %d: %3f | Training accuracy: %3f\n", epoch, l, acc/60000))
   
   # Visualize re-constructions for 10 digits
+  par(mfrow=c(5, 4), mai=rep(0, 4))
+  
   for(i in 1:10) {
     x_test = torch_reshape(mnist$train$images[i, ]/255, list(28, 28))
 
@@ -207,6 +208,17 @@ for(epoch in 1:epochs) {
     
   }
   
+  if(latent_dim == 2) {
+    
+    # Visualize latent (we just show the means)
+    require(ggsci)
+    par(mfrow=c(1, 1))
+    encoding = ss_vae$encoder(torch_tensor(mnist$test$images/255))
+    z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
+    plot(z[, 1], z[, 2], pch=20, col=pal_d3("category10")(10)[c(mnist$test$labels+1)])
+  
+  }
+  
 }
 
 
@@ -214,7 +226,7 @@ for(epoch in 1:epochs) {
 par(mfrow=c(2, 2))
 
 for(i in 1:4) {
-  z = torch_randn(c(1, 10))
+  z = torch_randn(c(1, latent_dim))
   mat = torch_reshape(ss_vae$decoder(z), list(28, 28))
   mat = matrix(as.numeric(mat), 28, 28)
   mat = apply(mat, 2, rev)
@@ -225,5 +237,12 @@ for(i in 1:4) {
   text(0.1,0.1, as.numeric(label), col="gray90", cex=2)
 }
 
+# Overall test accuracy
+encoding = ss_vae$encoder(torch_tensor(mnist$test$images/255))
+z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
 
+pred = ss_vae$classifier(z)
+pred = torch_argmax(pred, 2)
 
+acc = mean(as.numeric(pred == mnist$test$labels+1))
+acc

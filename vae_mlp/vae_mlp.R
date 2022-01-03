@@ -13,7 +13,8 @@ mnist <- read_mnist()
 
 library(torch)
 
-mnist_rnorm = torch_tensor(mnist$train$images/255)
+# Set VAEs latent dimension
+latent_dim <- 2
 
 # Define encoder and decoder network
 encoder <- nn_module(
@@ -99,13 +100,13 @@ mnist_dataset <- dataset(
   
   mnist_data = function() {
     
-    input <- mnist_renorm 
+    input <- torch_tensor(mnist$train$images/255) 
     input
   }
 )
 
 #Initialize the VAE module with latent dimension as specified
-vae <- vae_module(latent_dim=20)
+vae <- vae_module(latent_dim=latent_dim)
 
 # Dataloader
 dl <- dataloader(mnist_dataset(), batch_size = 250, shuffle = TRUE, drop_last=TRUE)
@@ -154,10 +155,9 @@ for(epoch in 1:epochs) {
   
   # Visualize re-constructions for 10 digits
   for(i in 1:10) {
-    x_test = torch_reshape(mnist_renorm[i], list(28, 28))
-    dim(mnist_renorm[1,])
+    x_test = torch_reshape(mnist$train$images[i, ]/255, list(28, 28))
     
-    mat1 = apply(matrix(as.numeric(mnist_renorm[i]), 28, 28), 1, rev)
+    mat1 = apply(matrix(as.numeric(mnist$train$images[i, ])/255, 28, 28), 1, rev)
     
     digit <- t(mat1)
     image(digit, col = grey.colors(255), axes=FALSE)
@@ -177,9 +177,17 @@ for(epoch in 1:epochs) {
 par(mfrow=c(2, 2))
 
 for(i in 1:4) {
-  z = torch_randn(c(1, 20))
+  z = torch_randn(c(1, latent_dim))
   mat = torch_reshape(vae$decoder(z), list(28, 28))
   mat = matrix(as.numeric(mat), 28, 28)
   mat = apply(mat, 2, rev)
   image(t(mat), col = grey.colors(255), axes=FALSE)
+}
+
+if(latent_dim == 2) {
+  # Visualize latent 
+  par(mfrow=c(1, 1))
+  encoding = vae$encoder(torch_tensor(mnist$test$images/255))
+  z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
+  plot(z[, 1], z[, 2], pch=20, col=mnist$test$labels)
 }
