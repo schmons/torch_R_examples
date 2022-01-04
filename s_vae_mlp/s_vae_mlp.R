@@ -85,7 +85,7 @@ ss_vae_module <- nn_module(
     f <- self$encoder(x)
     mu <- f[[1]]
     log_var <- f[[2]]
-    z <- mu + torch_exp(log_var)*torch_randn(c(dim(x)[1], self$latent_dim))
+    z <- mu + torch_exp(log_var$mul(0.5))*torch_randn(c(dim(x)[1], self$latent_dim))
     reconst_x <- self$decoder(z)
     prediction <- self$classifier(z)
     
@@ -134,7 +134,7 @@ lmbda <- function(epoch) 0.8
 scheduler <- lr_multiplicative(optimizer, lr_lambda=lmbda, last_epoch = -1, verbose = FALSE)
 
 
-epochs = 30  # Number of full epochs (passes through the dataset)
+epochs = 40  # Number of full epochs (passes through the dataset)
 
 # This is just changing graph parameters for later
 
@@ -174,7 +174,6 @@ for(epoch in 1:epochs) {
     
     
     # Compute accuracy
-    #softmax = nn_log_softmax(1)
     pred = torch_argmax(forward[[4]], 2)
     #print(pred == b$y)
     batch_acc = sum(as.numeric(pred == b$y))
@@ -183,7 +182,7 @@ for(epoch in 1:epochs) {
   })
   
   #scheduler$step()
-  cat(sprintf("Loss at epoch %d: %3f | Training accuracy: %3f\n", epoch, l, acc/60000))
+  cat(sprintf("Loss at epoch %d: %3f | Training accuracy: %3f\n", epoch, 128*l/60000, acc/60000))
   
   # Visualize re-constructions for 10 digits
   par(mfrow=c(5, 4), mai=rep(0, 4))
@@ -211,10 +210,10 @@ for(epoch in 1:epochs) {
   if(latent_dim == 2) {
     
     # Visualize latent (we just show the means)
-    require(ggsci)
+    require("ggsci")
     par(mfrow=c(1, 1))
     encoding = ss_vae$encoder(torch_tensor(mnist$test$images/255))
-    z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
+    z = encoding[[1]] + torch_exp(encoding[[2]]$mul(0.5))*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
     plot(z[, 1], z[, 2], pch=20, col=pal_d3("category10")(10)[c(mnist$test$labels+1)])
   
   }
@@ -223,9 +222,9 @@ for(epoch in 1:epochs) {
 
 
 # Generate new data
-par(mfrow=c(2, 2))
+par(mfrow=c(4, 4))
 
-for(i in 1:4) {
+for(i in 1:16) {
   z = torch_randn(c(1, latent_dim))
   mat = torch_reshape(ss_vae$decoder(z), list(28, 28))
   mat = matrix(as.numeric(mat), 28, 28)
@@ -239,7 +238,7 @@ for(i in 1:4) {
 
 # Overall test accuracy
 encoding = ss_vae$encoder(torch_tensor(mnist$test$images/255))
-z = encoding[[1]] + torch_exp(encoding[[2]])*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
+z = encoding[[1]] + torch_exp(encoding[[2]]$mul(0.5))*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
 
 pred = ss_vae$classifier(z)
 pred = torch_argmax(pred, 2)
