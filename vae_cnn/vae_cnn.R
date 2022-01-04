@@ -145,8 +145,6 @@ for(epoch in 1:epochs) {
   
   coro::loop(for (b in dl) {  # loop over all minibatches for one epoch
 
-    #print(dim(b))
-    #print(vae$encoder(b))
     forward = vae(torch_reshape(b, list(b$size(1), 1, 28, 28)))
     
     # likelihood part of the loss
