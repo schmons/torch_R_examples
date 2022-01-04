@@ -13,11 +13,6 @@ mnist <- read_mnist()
 
 library(torch)
 
-# Is GPU available?
-device <- torch::torch_device(if(torch::cuda_is_available()) "cuda" else "cpu")
-model$to(device = device)
-
-
 # Set VAEs latent dimension
 latent_dim <- 2
 
