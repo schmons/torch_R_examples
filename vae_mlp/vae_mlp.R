@@ -186,8 +186,9 @@ for(i in 1:16) {
 
 if(latent_dim == 2) {
   # Visualize latent 
+  require("ggsci")
   par(mfrow=c(1, 1))
   encoding = vae$encoder(torch_tensor(mnist$test$images/255))
   z = encoding[[1]] + torch_exp(encoding[[2]]$mul(0.5))*torch_randn(c(dim(encoding[[1]])[1], latent_dim))
-  plot(z[, 1], z[, 2], pch=20, col=mnist$test$labels)
+  plot(z[, 1], z[, 2], pch=20, col=pal_d3("category10")(10)[c(mnist$test$labels+1)])
 }
